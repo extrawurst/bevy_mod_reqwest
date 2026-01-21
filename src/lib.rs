@@ -57,7 +57,7 @@ impl Plugin for ReqwestPlugin {
                         .url
                         .clone();
 
-                    if let None = world.get::<Name>(ctx.entity) {
+                    if world.get::<Name>(ctx.entity).is_none() {
                         let mut commands = world.commands();
                         let mut entity = commands.get_entity(ctx.entity).unwrap();
                         entity.insert(Name::new(format!("http: {url}")));
@@ -362,17 +362,13 @@ pub struct ReqwestInflight {
 impl ReqwestInflight {
     fn poll(&mut self) -> Option<Resp> {
         #[cfg(target_family = "wasm")]
-        if let Ok(v) = self.res.try_recv() {
-            Some(v)
-        } else {
-            None
+        {
+            self.res.try_recv().ok()
         }
 
         #[cfg(not(target_family = "wasm"))]
-        if let Some(v) = future::block_on(future::poll_once(&mut self.res)) {
-            Some(v)
-        } else {
-            None
+        {
+            future::block_on(future::poll_once(&mut self.res)).map(|v| v)
         }
     }
 
