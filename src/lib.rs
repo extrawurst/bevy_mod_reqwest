@@ -228,7 +228,7 @@ pub struct BevyReqwest<'w, 's> {
 impl<'w, 's> BevyReqwest<'w, 's> {
     /// Starts sending and processing the supplied [`reqwest::Request`]
     /// then use the [`BevyReqwestBuilder`] to add handlers for responses and errors
-    pub fn send(&mut self, req: reqwest::Request) -> BevyReqwestBuilder {
+    pub fn send(&mut self, req: reqwest::Request) -> BevyReqwestBuilder<'_> {
         let inflight = self.create_inflight_task(req);
         BevyReqwestBuilder(self.commands.spawn((inflight, DespawnReqwestEntity)))
     }
@@ -239,7 +239,7 @@ impl<'w, 's> BevyReqwest<'w, 's> {
         &mut self,
         entity: Entity,
         req: reqwest::Request,
-    ) -> Result<BevyReqwestBuilder, Box<dyn std::error::Error>> {
+    ) -> Result<BevyReqwestBuilder<'_>, Box<dyn std::error::Error>> {
         let inflight = self.create_inflight_task(req);
         let mut ec = self.commands.get_entity(entity)?;
         info!("inserting request on entity: {:?}", entity);
